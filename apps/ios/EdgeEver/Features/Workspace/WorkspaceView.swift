@@ -210,9 +210,6 @@ struct WorkspaceView: View {
             .onChange(of: env.bootstrapProgress?.totalCount) { _, _ in
                 store.reload(env: env)
             }
-            .onChange(of: env.preferences.showDescendantNotes) { _, _ in
-                store.reload(env: env)
-            }
             .refreshable {
                 await env.runSyncCycle(force: true)
                 store.reload(env: env)

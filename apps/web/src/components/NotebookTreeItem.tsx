@@ -14,7 +14,7 @@ import {
   setMemoDragPreview,
 } from "@/lib/app-helpers";
 import { cn } from "@/lib/utils";
-import { formatNotebookMemoCount, type Notebook } from "@edgeever/shared";
+import type { Notebook } from "@edgeever/shared";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -41,7 +41,6 @@ export const NotebookTreeItem = ({
   onOpenChange,
   expandSiblingsRequest,
   onExpandSiblings,
-  showDescendantNotes,
 }: {
   node: NotebookNode;
   depth: number;
@@ -57,12 +56,10 @@ export const NotebookTreeItem = ({
   onOpenChange: (notebookId: string, open: boolean) => void;
   expandSiblingsRequest: { parentId: string | null; token: number } | null;
   onExpandSiblings: (parentId: string | null) => void;
-  showDescendantNotes: boolean;
 }) => {
   const { t } = useTranslation();
   const open = !collapsedNotebookIds.has(node.id);
   const hasChildren = node.children.length > 0;
-  const showsSplitCount = !showDescendantNotes && hasChildren;
   const selected = node.id === selectedNotebookId;
   const isInbox = node.slug === "inbox";
   const hasSelectedDescendant = selectedNotebookId ? notebookTreeContainsId(node.children, selectedNotebookId) : false;
@@ -224,9 +221,9 @@ export const NotebookTreeItem = ({
               data-notebook-tree-button
               className="flex min-w-0 flex-1 items-center gap-2 text-left"
               type="button"
-              aria-label={showsSplitCount
-                ? t(selected ? "notebookTree.currentWithSplitCount" : "notebookTree.switchToWithSplitCount", { name: node.name, direct: node.directMemoCount, total: node.memoCount })
-                : t(selected ? "notebookTree.currentWithCount" : "notebookTree.switchToWithCount", { name: node.name, count: showDescendantNotes ? node.memoCount : node.directMemoCount })}
+              aria-label={selected
+                ? t("notebookTree.currentWithCount", { name: node.name, count: node.memoCount })
+                : t("notebookTree.switchToWithCount", { name: node.name, count: node.memoCount })}
               aria-current={selected ? "page" : undefined}
               aria-expanded={hasChildren ? open : undefined}
               onClick={() => onSelect(node.id)}
@@ -279,7 +276,7 @@ export const NotebookTreeItem = ({
                 )}
                 aria-hidden="true"
               >
-                {formatNotebookMemoCount({ directCount: node.directMemoCount, totalCount: node.memoCount, hasChildren }, showDescendantNotes)}
+                {node.memoCount}
               </span>
             </button>
             <div ref={actionsRef} className="relative shrink-0">
@@ -402,7 +399,6 @@ export const NotebookTreeItem = ({
               onOpenChange={onOpenChange}
               expandSiblingsRequest={expandSiblingsRequest}
               onExpandSiblings={onExpandSiblings}
-              showDescendantNotes={showDescendantNotes}
             />
           ))}
         </m.div>

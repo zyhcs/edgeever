@@ -1,7 +1,6 @@
 use rusqlite::Connection;
 use serde_json::{json, Value};
 
-use crate::note_summary::note_list_metadata;
 use crate::{
     bool_param, content_hash, enqueue_change, markdown_doc, memo_remap_base_key, now_id,
     resolve_remapped_memo_base, string_param, tags_from_json,
@@ -9,8 +8,7 @@ use crate::{
 
 fn summary_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<Value> {
     let tags: String = row.get("tags_json")?;
-    let markdown: String = row.get("content_markdown")?;
-    let mut summary = json!({
+    Ok(json!({
         "id": row.get::<_, String>("id")?,
         "notebookId": row.get::<_, String>("notebook_id")?,
         "title": row.get::<_, Option<String>>("title")?,
@@ -23,12 +21,7 @@ fn summary_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<Value> {
         "createdAt": row.get::<_, String>("created_at")?,
         "updatedAt": row.get::<_, String>("updated_at")?,
         "deletedAt": row.get::<_, Option<String>>("deleted_at")?,
-    });
-    let metadata = note_list_metadata(&markdown);
-    if let (Some(summary), Some(metadata)) = (summary.as_object_mut(), metadata.as_object()) {
-        summary.extend(metadata.clone());
-    }
-    Ok(summary)
+    }))
 }
 
 pub(crate) fn memo_value(
@@ -447,7 +440,7 @@ pub(crate) fn list_memos(database: &Connection, params: &Value) -> Result<Value,
             )){filter}"
     );
     let query = format!("SELECT m.id, m.notebook_id, m.title, m.excerpt, m.tags_json, m.is_pinned, m.is_archived, m.is_deleted,
-                c.revision, m.created_at, m.updated_at, m.deleted_at, c.content_markdown
+                c.revision, m.created_at, m.updated_at, m.deleted_at
            FROM memos m JOIN memo_contents c ON c.memo_id = m.id
           WHERE {where_clause}
           ORDER BY {order} LIMIT ?6 OFFSET ?7");

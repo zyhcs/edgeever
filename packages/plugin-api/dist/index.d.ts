@@ -43,12 +43,6 @@ interface PluginSettingBase {
     key: string;
     label: string;
     description?: string;
-    locales?: Record<string, {
-        label?: string;
-        description?: string;
-        placeholder?: string;
-        options?: Record<string, string>;
-    }>;
     required?: boolean;
     /** Host-rendered read-only items, opened from a small entry next to the field. */
     list?: PluginSettingList;

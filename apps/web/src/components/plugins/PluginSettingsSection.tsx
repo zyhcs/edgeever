@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/dialog";
 import { SETTINGS_ITEM_TITLE_CLASSNAME } from "@/components/settings/settings-ui";
 import { groupPluginSettingFields } from "./plugin-settings-layout";
-import { localizePluginSettingField } from "./plugin-settings-localization";
 
 const PluginSettingListDialog = ({ field }: { field: PluginSettingField }) => {
   const { t } = useTranslation();
@@ -169,11 +168,10 @@ const PluginSettingFieldRow = ({
 };
 
 export const PluginSettingsSection = ({ host, manifest }: { host: EdgeEverPluginHost; manifest: PluginManifest }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const formId = useId();
   const fields = manifest.settings?.fields ?? [];
-  const localizedFields = fields.map((field) => localizePluginSettingField(field, i18n.resolvedLanguage ?? i18n.language));
-  const fieldGroups = groupPluginSettingFields(localizedFields);
+  const fieldGroups = groupPluginSettingFields(fields);
   const fieldLoadSignature = pluginSettingLoadSignature(fields);
   const fieldsRef = useRef(fields);
   fieldsRef.current = fields;
