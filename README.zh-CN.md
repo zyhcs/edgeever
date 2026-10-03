@@ -169,7 +169,7 @@ curl -fsSL https://edgeever.org/install.sh | bash
 
 - **智能正文提取**：自动提取网页文章正文并转为纯净 Markdown，自动保留来源网址与剪藏时间。
 - **划选与右键剪藏**：选中局部文字或右键任意图片直接存为独立笔记，无需抓取整页冗余内容。
-- **X (Twitter) 推文剪藏**：右键单条推文自动展开长文全文，连同作者、发布时间与配图完整归档。
+- **社媒与社区深度剪藏**：深度适配 X (Twitter)、小红书、知乎、Reddit 与 GitHub，一键发送。
 - **自托管隐私直连**：剪藏内容直传个人自托管实例，不经过任何第三方服务器中转。
 
 ## 社区与反馈
@@ -249,10 +249,10 @@ content_text      搜索、摘要和索引使用
 
 ## MCP
 
-在 **个人中心** -> **MCP 设置** 中创建 API Token 并交给 AI Agent，即可让 Agent 在账号授权范围内安全地管理你的知识库。系统同时支持文本笔记与图表笔记（涵盖思维导图、流程图和架构图三种），支持对这些笔记进行完整的增删改查；Agent 还可根据字段方案创建多维表格笔记、编辑字段，并读取、新增、修改和删除表格记录，同时管理笔记模板与 AI 指令。
+在 **个人中心** -> **API / MCP** 中创建 API Token 并一键复制 Remote MCP 配置，即可让 Claude Code、Cursor、Antigravity、OpenClaw 等 AI Agent 在账号授权范围内安全管理你的知识库。系统支持文本笔记、图表笔记（思维导图、流程图与架构图）和多维表格笔记的完整增删改查，Agent 还可管理笔记本目录、标签、附件、历史版本、笔记模板与 AI 指令。
 
 > 💡 **场景启发：**
-> 让 AI 真正成为你的知识管家与创作外脑——不仅能将方案秒级生成为可交互的思维导图与架构图，还能为 AI Agent 提供私有上下文。依托 EdgeEver 强大的富文本编辑与精美排版能力，AI 协同沉淀的不再是冰冷文本，而是结构工整、排版优雅、随时可一键分发的高品质知识资产。
+> 让 AI 真正成为你的知识管家与创作外脑——不仅能将方案秒级生成为可交互的思维导图、流程图、架构图与多维表格，还能为 AI Agent 提供私有知识上下文。依托 EdgeEver 强大的富文本编辑与精美排版能力，AI 协同沉淀的不再是冰冷文本，而是结构工整、排版优雅、随时可一键分发的高品质知识资产。
 
 ## 图片压缩规则
 
@@ -282,9 +282,8 @@ Web、PWA 与桌面端会在停止编辑 30 秒后上传笔记，并在页面可
 
 ## 致谢
 
-- EdgeEver 的笔记产品设计也参考了 [Evernote（印象笔记）](https://evernote.com/) 等成熟笔记工具的公开产品体验。相关功能由 EdgeEver 独立设计与实现。
+- EdgeEver 的笔记产品设计也参考了 [Evernote（印象笔记）](https://evernote.com/)、[Notion](https://www.notion.com/) 等成熟笔记工具的公开产品体验。相关功能由 EdgeEver 独立设计与实现。
 - 思维导图与可视化图表笔记的产品设计参考了 [XMind](https://xmind.com/) 和 [ProcessOn](https://www.processon.com/) 等图表工具的公开产品体验。相关功能由 EdgeEver 独立设计与实现。
-- 编辑器主题的排版架构、标题层级与章节结构参考了 [obsidian-minimal](https://github.com/kepano/obsidian-minimal)、[Outline](https://github.com/outline/outline) 和 [墨格](https://moyufang.cn/editor) 的公开方案。名称、素材与实现均由 EdgeEver 独立完成。
 
 ## 商标与品牌使用
 

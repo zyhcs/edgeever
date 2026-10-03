@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { PanelRightClose, Sparkles, Undo2 } from "lucide-react";
+import { ArrowUp, PanelRightClose, Sparkles, Undo2 } from "lucide-react";
+import type { MouseEvent } from "react";
 import type { InfographicConversationTurn } from "@edgeever/shared";
 import { Button } from "@/components/ui/button";
 import { Conversation, ConversationContent, ConversationEmptyState, ConversationScrollButton } from "@/components/ai-elements/conversation";
@@ -14,7 +15,8 @@ import {
   usePromptInputController,
 } from "@/components/ai-elements/prompt-input";
 import { cn } from "@/lib/utils";
-import { BuiltinAgentStatus } from "./BuiltinAgentStatus";
+import { SidebarAgentModeStatus } from "./SidebarAgentModeStatus";
+import { memoIdFromSidebarLinkEvent, rewriteSidebarNoteLinks, sidebarNoteLinkAllowedTags, sidebarNoteLinkComponents } from "./sidebar-note-links";
 
 const threadClassName = cn(
   "gap-3 p-3 text-[13px] leading-[1.6]",
@@ -51,6 +53,7 @@ function InfographicSidebarComposer({ session }: { session: InfographicSidebarCo
   const draft = textInput.value.trim();
   return (
     <PromptInput
+      inputGroupClassName="rounded-[22px] border-slate-200 bg-card shadow-sm has-[[data-slot=input-group-control]:focus-visible]:ring-0"
       onSubmit={async ({ text }) => {
         const raw = text.trim().slice(0, 1000);
         if (!raw || session.generating) throw new Error("empty");
@@ -58,12 +61,12 @@ function InfographicSidebarComposer({ session }: { session: InfographicSidebarCo
       }}
     >
       <PromptInputTextarea
-        className="text-[13px] leading-5 md:text-[13px]"
+        className="min-h-20 px-4 pb-2 pt-4 text-[13px] leading-5 md:text-[13px]"
         disabled={session.generating}
         maxLength={1000}
         placeholder={t(session.hasGraphic ? "infographic.refinePrompt" : "infographic.prompt")}
       />
-      <PromptInputFooter>
+      <PromptInputFooter className="px-2.5 pb-2.5 pt-0">
         <PromptInputTools>
           {session.canUndo ? (
             <Button type="button" size="sm" variant="outline" disabled={session.generating} onClick={session.onUndo}>
@@ -79,13 +82,28 @@ function InfographicSidebarComposer({ session }: { session: InfographicSidebarCo
         ) : (
           <PromptInputSubmit
             aria-label={t(session.hasGraphic ? "infographic.applyRefinement" : "infographic.generate")}
-            className="border-slate-900 bg-slate-900 text-slate-50 hover:border-slate-800 hover:bg-slate-800"
+            className="rounded-full border-slate-900 bg-slate-900 text-slate-50 hover:border-slate-800 hover:bg-slate-800 disabled:border-slate-100 disabled:bg-slate-100 disabled:text-slate-300"
             disabled={!draft}
             variant="solid"
-          />
+          >
+            <ArrowUp className="size-4" />
+          </PromptInputSubmit>
         )}
       </PromptInputFooter>
     </PromptInput>
+  );
+}
+
+function InfographicReply({ children, isAnimating }: { children: string; isAnimating?: boolean }) {
+  return (
+    <MessageResponse
+      allowedTags={sidebarNoteLinkAllowedTags}
+      className="edgeever-infographic-chat-response break-words"
+      components={sidebarNoteLinkComponents}
+      isAnimating={isAnimating}
+    >
+      {rewriteSidebarNoteLinks(children)}
+    </MessageResponse>
   );
 }
 
@@ -93,13 +111,20 @@ export function InfographicSidebarSession({
   session,
   noteTitle,
   onOpenChange,
+  onOpenNote,
 }: {
   session: InfographicSidebarController;
   noteTitle?: string;
   onOpenChange: (open: boolean) => void;
+  onOpenNote?: (memoId: string, notebookId: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const title = noteTitle?.trim() || t("infographic.name");
+  const openLinkedNote = (event: MouseEvent<HTMLElement>) => {
+    const linkedId = memoIdFromSidebarLinkEvent(event);
+    if (!linkedId || !onOpenNote) return;
+    onOpenNote(linkedId, "");
+  };
   const reply = (turn: InfographicConversationTurn) => turn.response
     || (turn.kind === "clarified"
       ? t("infographic.historyClarified")
@@ -114,7 +139,7 @@ export function InfographicSidebarSession({
           <Sparkles className="size-3.5 shrink-0" aria-hidden="true" />
           <span className="truncate">{title}</span>
         </span>
-        <BuiltinAgentStatus />
+        <SidebarAgentModeStatus />
         <Button
           type="button"
           size="icon-sm"
@@ -127,7 +152,7 @@ export function InfographicSidebarSession({
         </Button>
       </div>
       <Conversation className="min-h-0 flex-1" aria-label={t("infographic.historyTitle")}>
-        <ConversationContent className={threadClassName}>
+        <ConversationContent className={threadClassName} onClick={openLinkedNote}>
           {!session.turns.length && !session.activeTurn ? (
             <ConversationEmptyState
               icon={<Sparkles className="h-6 w-6" />}
@@ -142,7 +167,7 @@ export function InfographicSidebarSession({
               </Message>
               <Message from="assistant">
                 <MessageContent className="w-full text-foreground">
-                  <MessageResponse className="edgeever-infographic-chat-response break-words">{reply(turn)}</MessageResponse>
+                  <InfographicReply>{reply(turn)}</InfographicReply>
                   {turn.decision && turn.decision !== turn.response ? <p className="text-xs text-slate-600">{turn.decision}</p> : null}
                   {turn.template ? <p className="text-xs text-slate-500">{turn.template}</p> : null}
                   {turn.error ? <p className="text-xs text-red-600">{turn.error}</p> : null}
@@ -159,9 +184,9 @@ export function InfographicSidebarSession({
               </Message>
               <Message from="assistant">
                 <MessageContent className="w-full text-foreground">
-                  <MessageResponse className="edgeever-infographic-chat-response break-words" isAnimating={session.generating}>
+                  <InfographicReply isAnimating={session.generating}>
                     {session.activeTurn.response || session.activeTurn.question || t("infographic.generating")}
-                  </MessageResponse>
+                  </InfographicReply>
                   {session.activeTurn.decision && session.activeTurn.decision !== session.activeTurn.response ? <p className="text-xs text-slate-600">{session.activeTurn.decision}</p> : null}
                   {session.activeTurn.template ? <p className="text-xs text-slate-500">{session.activeTurn.template}</p> : null}
                 </MessageContent>
@@ -172,7 +197,7 @@ export function InfographicSidebarSession({
         <ConversationScrollButton aria-label={t("infographic.scrollToBottom")} />
       </Conversation>
       {!session.readOnly ? (
-        <div className="shrink-0 border-t border-slate-200 p-3">
+        <div className="shrink-0 p-3">
           <PromptInputProvider>
             <InfographicSidebarComposer session={session} />
           </PromptInputProvider>
